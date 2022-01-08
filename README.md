@@ -1,0 +1,1 @@
+# nishika_prediction_of_second-hand_apartment_2022winter
