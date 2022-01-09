@@ -1,14 +1,13 @@
+![comp](./images/nishika_prediction_of_second-hand_apartment_2022winter.png)
 # nishika_prediction_of_second-hand_apartment_2022winter
-![comp](./data/info/images/readme/001_comp.png)
-# nishika_prediction_of_second-hand_apartment_2022winter
-Cornell Birdcall Identification コンペのリポジトリ
+NISHIKA-中古マンション価格予測 2022冬の部 コンペのリポジトリ
 
 - result
-  - public: 0.566
-  - private: 0.599
-  - rank: 114/1390
+  - public: 0.000
+  - private: 0.000
+  - rank: 0000/9999
 
-    <img src='./data/info/leaderboard/20200915_private_0p599_114_1390.png' width='500'>
+    <img src='./images/ranking.png' width='500'>
 
 
 
