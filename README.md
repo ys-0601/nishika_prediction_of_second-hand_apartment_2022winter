@@ -13,227 +13,213 @@ NISHIKA-中古マンション価格予測 2022冬の部 コンペのリポジト
 
 - directory tree
 ```
-Kaggle-Cornell-Birdcall-Identification
+nishika_prediction_of_second-hand_apartment_2022winter
 ├── README.md
-├── data         <---- gitで管理するデータ
-├── data_ignore  <---- .gitignoreに記述されているディレクトリ(モデルとか、特徴量とか、データセットとか)
-├── nb           <---- jupyter lab で作業したノートブック
-├── nb_download  <---- ダウンロードした公開されているkagglenb
-└── src          <---- .ipynb 以外のコード
+├── data         <---- nishika提供データ
+├── images       <---- readme用画像
+├── program      <---- jupyter lab用ノートブック
+      ├──std     <---- post時のノートブック
+      ├──edit    <---- 作業用ノートブック
 ```
 
 ## Pipeline
 - 実行例
   ```bash
-  python3 pipeline.py --globals.balanced=1 --globals.comment=test
+  #python3 pipeline.py --globals.balanced=1 --globals.comment=test
   ```
 
 - 結果の表示例
   ```bash
-  python3 show_result.py -d 0
+  #python3 show_result.py -d 0
   ```
 
 
 
 ## Info
-- [issue board](https://github.com/fkubota/kaggle-Cornell-Birdcall-Identification/projects/1)   <---- これ大事だよ
-- [google slide](https://docs.google.com/presentation/d/1ZcCSnXj2QoOmuIkcA-txJOuAlkLv4rSlS7_zDj90q6c/edit#slide=id.p)
-- [flow chart](https://app.diagrams.net/#G1699QH9hrlRznMikAEAE2-3WTjreYcWck)
-- [google drive](https://drive.google.com/drive/u/1/folders/1UDVIKTN1O7hTL9JYzt7ui3mNy_b6RHCV)
+- [issue board](https://github.com/ys-0601/nishika_prediction_of_second-hand_apartment_2022winter/projects/1)   <---- これ大事だよ
 - ref:
-  - [metricについて](https://www.kaggle.com/shonenkov/competition-metrics)
-- docker run 時にいれるオプション
-  - `--shm-size=5G`
+
 
 ## Timeline
 
-<img src='./data/info/images/readme/gantt.png' width='1000'>
+<img src='./images/timeline.png' width='1000'>
 
-```mermaid
-gantt
-  title timeline
-  dateFormat YYYY-MM-DD
-  section Official
-  Competetion: a1, 2020-06-08, 2020-09-15
-  Entry deadline: a3, 2020-09-07, 2020-09-08
-  Team Merger deadline: a4, 2020-09-07, 2020-09-08
-  Final submission deadline: a2, 2020-09-14, 2020-09-15
-  section Score
-  Join!:2020-07-25, 2020-07-26
-  0.002(591/601): 2020-07-31, 2020-08-01
-  0.544(): 2020-08-02, 2020-08-03
-  0.560(506/805): 2020-08-14, 2020-08-15
-  0.562(457/1022): 2020-08-22, 2020-08-23
-  0.567(419/1150): 2020-08-30, 2020-08-31
-```
-
-## Dataset
+## External Dataset
 |Name|Detail|Ref|
 |---|---|---|
-|SpectrogramDataset|5秒のSpectrogramを取得する。audiofileが5秒より短い場合、足りない部分に0 paddingする。5秒より長いものはランダムに5秒の部分を抽出する。|[公開ノートブック(tawaraさん)](https://www.kaggle.com/ttahara/training-birdsong-baseline-resnest50-fast)|
-|SpectrogramEventRmsDataset|(バグ有り)SpectrogramDataset(SD)を改良。SDでは、鳥の鳴き声が入っていない部分を抽出する可能性があったのでそれを回避するために作った。librosa_rmsを使用し、バックグラウンドに比べてrmsが大きい値を取る時evet(birdcall)とした。|nb012|
-|SpectrogramEventRmsDatasetV2|SpectrogramEventRmsDatasetにバグがあった(nb015)のでfix。|nb015|
-|SpectrogramEventRmsDatasetV3|SpectorgramEventRmsDatasetV2を高速化。(nb017で作ったデータフレームを使用)|nb018|
-|SpectrogramEventRmsDatasetV4|1sec 専用Dataset。V3で煩わしかった境界問題に対処した。|nb021|
-|PANNsDatasetMod|PANNs用。とはいえSpectrogramDatasetとほとんど同じ。スペクトログラムは計算せずに、signalをPANNsに渡すようになってる。|nb024|
-|PANNsDatasetEventRmsDataset|PANNs用。nb017_event_rmsを使用してevent部分で学習している。|nb025|
-|SpectrogramEventRandomDataset|nb034のeventデータを使う。event部分だけだと、小さな鳥の鳴き声が学習に入らない可能性があるため、event+random_cropを行なう。ratioパラメータがあり、足すeventの大きさを変えられる。|nb043|
+|prefecture_rank.csv|公示地価（国交省）データ。住居表示から都道府県名のみ取り出し、都道府県名別にR3価格の平均値を算出＞値の昇順にしたものがrankingシート|./data/prefecture_rank.xlsx|
 
-## Event
-|Name|Detail|Ref|
-|---|---|---|
-|nb017_event_rms|liborsaのrmsを使用。ラウドネスを見ていると思えばいい。|nb017|
-|nb034_event_intensity_500to16000hz|500~16000HzのスペクトルのIntensityをが大きいところをevent部分としている。|nb034|
-
+## Modularized file
+|Name|Detail|In|Out|
+|---|---|---|---|
+|df_pre.py|DataFrameからlightgbt用特徴量作成処理をモジュール化したもの。|DataFrame(処理前)|DataFrame(処理後)|
 
 ## Features
-|Name|shape (feat only)|size(MB)|Detail|
+|Name|structure|type|Detail|
 |---|---|---|---|
-|nb004_librosa_mfcc.csv|(21,375, 11)|2.0|librosaのmfcc(2~12)。audiofile1つにつき1ベクトル。srを揃えてないので周波数空間の大きさに差が有り問題がありそう。srを16kHzとかにそろえたほうがいいと思う。|
-|nb007_librosa_mfcc02.csv|(4,779,859, 11)|436.1|nb004の特徴量の拡張。audiofile内のn_feat/m_audio/1_bird。nb004の特徴量よりかなりデータ数が多い。|
-|nb008_librosa_basic|(4,779,859, 12)|482.7|['rms', 'centroid', 'sc_1', 'sc_2', 'sc_3', 'sc_4', 'sc_5', 'sc_6', 'sb', 'sf', 'sr', 'zcr']。nb004と同じくsrを揃えていない問題がある。|
-|nb010_librosa_rms.csv|(4779859, 3)|144|event部分だけ抽出する際のthresholdとして使う。|
+|市区町村コード|692882 non-null|int64|市区長村のコード。未処理。unique|
+|都道府県名_num|692882 non-null|int32|都道府県を、県別地価ランク順にナンバリングしたもの。|
+|地区名|692221 non-null|object|地区名データ。未処理。|
+|最寄駅：名称|690187 non-null|object|最寄り駅名。未処理。|
+|最寄駅：距離（分）_min|669761 non-null|float64|最寄り駅までの距離。30~60/60~90/90~120/120~とラベルされていたものはそれぞれ45/75/105/120とラベルし直した。|
+|間取り|668450 non-null|object|間取りデータ。未処理。|
+|面積（㎡）_num|692882 non-null|int32|面積データを数値型に変換。|
+|建築年_year|672808 non-null|float64|建築年データを建築からの経過年数に変換。|
+|建物の構造_num|675496 non-null|float64|建物の構造データ。高強度を5、低強度を1として数値型変換。|
+|用途|630269 non-null|object|用途データ。未処理。|
+|今後の利用目的|328144 non-null|object|今後の利用目的データ。未処理。|
+|都市計画|673457 non-null|object|年計画データ。未処理。|
+|建ぺい率（％）|669257 non-null|float64|建ぺい率データ。未処理。|
+|容積率（％）|669257 non-null|float64|容積率データ。未処理。|
+|取引時点_num|692882 non-null|float64|取引時点データ。年度を４半期まで分けて数値データ化。|
+|改装|628856 non-null|object|改装データ。未処理。|
+|取引の事情等|18679 non-null|object|取引の事情データ。未処理。|
+|取引価格（総額）_log|692882 non-null|float64|目的変数。|
 
-## Paper
+
+
+## Paper/Reference
 |No.|Status|Name|Detail|Date|Url|
 |---|---|---|---|---|---|
-|01|<font color='gray'>Done</font>|音響イベントと音響シーンの分析|日本語記事。まず最初に読むとよい。|2018|[url](https://www.jstage.jst.go.jp/article/jasj/74/4/74_198/_pdf)|
-|02|<font color='green'>Doing</font>|PANNs: Large-Scale Pretrained Audio Neural Networks for Audio Pattern Recognition|アライさんがSEDの説明ノートブックで参照していた論文|201912|[url](https://arxiv.org/abs/1912.10211)|
-|03|<font color='gray'>Done</font>|Recognizing Birds from Sound - The 2018 BirdCLEF Baseline System|鳥の鳴き声を検出するコンペ？のベースライン。nocall除去についての方法が書かれていた。さらに、nocall部分をノイズとして加えたaugmentationがかなり効いたみたい。鳴き声は0.5~12kHzに集中するらしい。|201804|[url](https://arxiv.org/abs/1804.07177)|
-|04|<font color='orange'>Todo</font>|ResNeSt: Split-Attention Networks|ResNeSTの原論文|202004|[url](https://arxiv.org/abs/2004.08955#:~:text=Our%20network%20preserves%20the%20overall,networks%20with%20similar%20model%20complexities.)|
-|05|<font color='gray'>Done</font>|Weakly Labelled AudioSet Tagging with Attention Neural Networks|DCASEについての論文。弱ラベルのタスクについて。|2019|[url](https://arxiv.org/abs/1903.00765)|
-|06|<font color='gray'>Done</font>|Robust Audio Event Recognition with 1-Max Pooling Convolutional Neural Networks|音響イベント検知についての論文。1-Max Poolingについて。|201604|[url](https://arxiv.org/abs/1604.06338)|
-|07|<font color='gray'>Done</font>|Adaptive pooling operators for weakly labeled sound event detection|弱ラベルの音響イベント検知についての論文。|201804|[url](https://arxiv.org/abs/1804.10070)|
-|08|<font color='gray'>Done</font>|Guided Learning Convolution System for DCASE 2019 Task 4|DCASE TASK4(SED)の論文。CNNについて。|201909|[url](https://arxiv.org/abs/1909.06178)|
-|09|<font color='gray'>Done</font>|Learning Sound Event Classifiers from Web Audio with Noisy Labels|ノイズが入ったラベルについて。|201901|[url](https://arxiv.org/abs/1901.01189)|
-|10|<font color='gray'>Done</font>|SpecAugment: A Simple Data Augmentation Method for Automatic Speech Recognition|SpecAugmentの原論文。|201904|[url](https://arxiv.org/abs/1904.08779)|
-|11|<font color='gray'>Done</font>|SPECMIX: A SIMPLE DATA AUGMENTATION AND WARM-UP PIPELINETO LEVERAGE CLEAN AND NOISY SET FOR EFFICIENT AUDIO TAGGING |SpecMixの原論文。SpecAugmentに影響を受けている。|2019|[url](http://dcase.community/documents/challenge2019/technical_reports/DCASE2019_Bouteillon_27_t2.pdf)|
-|12|<font color='gray'>Done</font>|Large-ScaleBird SoundClassificationusing Convolutional Neural Networks|鳥の鳴き声をDLで検知する論文。nocall部分を除去する方法が知りたくて読む。|2017|[url](http://ceur-ws.org/Vol-1866/paper_143.pdf)|
-|13|<font color='gray'>Done</font>|Audio Based Bird Species Identification usingDeep Learning Techniques|鳥の鳴き声をDLで検知する論文。テクニックがいろいろ載ってるっぽい。nocall部分を除去する方法が知りたくて読む。|2016|[url](http://ceur-ws.org/Vol-1866/paper_143.pdf)|
-|14|<font color='gray'>Done</font>|GENERAL-PURPOSE TAGGING OF FREESOUND AUDIO WITH AUDIOSET LABELS:TASK DESCRIPTION, DATASET, AND BASELINE|freesound audio tagging compのベースライン論文。とくに有用な情報はなかった。|2018|[url](https://arxiv.org/abs/1807.09902)|
-|15|<font color='orange'>Todo</font>|[DL輪読会] Residual Attention Network for Image Classification|日本語のスライド。Resnet+Attensionについて|201709|[url](https://www.slideshare.net/DeepLearningJP2016/dl-residual-attention-network-for-image-classification)|
-
-
-## Freesound Audio Tagging 2019
-|Status|Name|Detail|Date|Url|
-|---|---|---|---|---|
-|<font color='gray'>Done</font>|Freesound 7th place solution|アライさんたちのチームの解法。Strength Adaptive CropとCustom CNNが良さそう。|2019|[url](https://www.kaggle.com/hidehisaarai1213/freesound-7th-place-solution)|
-|<font color='gray'>Done</font>|kaggle Freesound Audio Tagging 2019 4th place solution|freesound audio tagging 2019 4th solution。日本語資料。オレの誕生日に発表してるから良い資料のはず。signal base, image base 両方取り入れている。|20190713|[url](https://www.slideshare.net/ssuser20fb43/kaggle-freesound-audio-tagging-2019-4th-place-solution-156063956)|
-
+|00|<font color='orange'>Todo</font>|Kaggle日記という戦い方|kaggle日記参照元。|2021/06|[url](https://zenn.dev/fkubota/articles/3d8afb0e919b555ef068)|
+|01|<font color='gray'>Doing</font>|LightGBMの俺用テンプレート|lightgbmテンプレ。optuna実装方法有。|2019/10|[url](https://qiita.com/dev_fukuro/items/2235fbe026622438989d)|
+|02|<font color='gray'>Doing</font>|コンペ用LightGBMの実装(Classification)|lightGBMテンプレ。交差検証＋特徴量重要度表示方法有。|2020/11|[url](https://www.sairablog.com/article/lightgbm-sklearn-kaggle-classification.html)|
+|03|<font color='gray'>Done</font>|kaggleでよく使う交差検証テンプレ(LightGBM向け)
+|交差検証(複数種類)テンプレ|2021/11|[url](https://amateur-engineer-blog.com/kaggle-cv-template-lightgbm/)|
+|04|<font color='orange'>Todo</font>|LightGBM(gbdt)のパラメータ/Tuningの個人的まとめ|lightGBMのパラメータまとめ|2020/09|[url](https://zenn.dev/mosamosa/articles/07d0076c9292136a3639)|
+|05|<font color='orange'>Todo</font>|---|---|---|[url]()|
+|06|<font color='gray'>Doint</font>|---|---|---|[url]()|
+|07|<font color='gray'>Done</font>|---|---|---|[url]()|
 
 ## Memo
 - term
   - nb: ノートブック
-  - kagglenb: kaggleのサイトで見れる/作れるノートブック
-- public LBの54%がnocallらしい。(https://www.kaggle.com/c/birdsong-recognition/discussion/159492)
+  - ----
+
 
 ## Basics
-**Overview(DeepL)**
+**背景と目的**
 
-窓の外で鳥のさえずりが聞こえてきませんか？世界には1万種以上の鳥が生息しており、手つかずの熱帯雨林から郊外、さらには都市部まで、ほぼすべての環境に生息しています。鳥は自然の中で重要な役割を果たしています。鳥は食物連鎖の上位に位置し、下層で発生している変化を統合します。そのため、鳥は生息地の質の低下や環境汚染の指標として優れています。しかし、鳥は目で見るよりも耳で聞く方が簡単なことが多い。適切な音の検出と分類があれば、研究者は鳥の個体数の変化に基づいて、その地域の生活の質に関する要因を自動的に直感的に把握することができます。
+定期開催コンペ「中古マンション価格予測 2022冬の部」
 
-自然の音風景を長期間にわたって連続的に記録することで、鳥類を広範囲に監視するプロジェクトがすでに多く進行中である。しかし、多くの生物や非生物はノイズを発生させるため、これらのデータセットの分析は、多くの場合、専門家が手作業で行っています。このような分析は非常に時間がかかり、結果も不完全なものになりがちです。データサイエンスが助けになるかもしれないので、研究者たちはAIモデルを訓練するために、鳥類の集音録音の大規模なクラウドソースのデータベースに目を向けている。しかし残念なことに、トレーニングデータ（個々の鳥の短い録音）と、モニタリングアプリケーションで使用されるサウンドスケープ録音（複数の種が同時に鳴いていることが多い長い録音）の間には、領域的なミスマッチがあります。これが、現在使用されているAIモデルの性能が低い理由の一つです。
+本コンペは2021年1-3月に開催した「中古マンション価格予測」を、以後四半期に一度、定期的に開催しているコンペとなります。過去コンペからデータが更新されている点にご注意ください。
+より多くの皆様にコンペをお楽しみいただくため、過去の「中古マンション価格予測」コンペで1-3位にご入賞された方は、賞金/賞品の授与・最終ランキング対象外とさせていただいております。ご理解のほど、賜れますと幸いです。
 
-これらの広範で情報量の多いサウンドアーカイブの可能性を最大限に引き出すためには、研究者は、データ駆動型の保存を支援するために、可能な限り多くの情報を確実に抽出する優れた機械リスナーが必要です。
+国内中古マンションの価格推定に挑戦！
 
-コーネル大学鳥類学研究所の保全生物音響センター（CCB）の使命は、自然界の音を収集し、解釈することです。CCB は革新的な保全技術を開発し、世界中の野生生物や生息地の保全に貢献しています。CCBはデータサイエンスのコミュニティと協力して、その使命をさらに高め、サウンドスケープ分析の精度を向上させたいと考えています。
-
-このコンテストでは、サウンドスケープの録音物に含まれる多種多様な鳥の発声を特定します。録音が複雑なため、ラベルが弱いものが含まれています。人為的な音（例：飛行機の空飛ぶ音）やその他の鳥や非鳥の鳴き声（例：シマリスの鳴き声）が背景にあり、ラベル付けされた特定の鳥の種が前景にあるかもしれません。複雑なサウンドスケープの録音を分析するための効果的な検出器と分類器を構築するために、あなたの新しいアイデアを持ってきてください!
-
-成功すれば、あなたの研究は、研究者が生息地の質の変化、汚染のレベル、修復作業の効果をよりよく理解するのに役立ちます。信頼性の高い機械リスナーはまた、保全活動家が世界中でより多くの録音ユニットを展開することを可能にし、まだ不可能な規模でのデータ駆動型の保全を可能にします。最終的な保全の成果は、鳥類や人間を含む多くの生物の生活の質を大きく向上させる可能性があります。
+本コンペティションのテーマは国内の中古マンションの価格推定です。
+皆さん御存知の通り、マンションに限らず不動産価格の推定は需要と供給だけではなく、市況や金融政策、人口動態の変化などの影響も受けるため、価格決定の要因が複雑怪奇に入り組んでおり高精度の推定は難易度が高いタスクです。
+一方で、不動産売買の歴史は古く、関連データも膨大に蓄積されているため、機械学習とは相性が良い分野です。実際に、中古マンションに限らずAI・機械学習による不動産価格推定の事例やサービスは快挙に暇がないほど無数にあるとも言えます。
+本コンペティションのデータは、Nishikaにて土地総合情報システムより取得・加工した独自データを提供いたしますが、これ以外のオープンデータについても利用可能です。
+※オープンデータの利用についてはコンペのルール・参加規約をご確認ください。
+AI・機械学習による不動産価格推定は、古くから取り組まれている一方で、日進月歩で研究開発が進んでいる分野でもあります。また、不動産の購入・投資の経験のあるユーザーや、専門知識を持つユーザーや不動産投資には一家言あるユーザーの方も多いのでは無いかと思います。先端知識と実体験から養われた肌感覚を合わせた創意工夫により、新たな推定エンジンの開発に挑んで頂ければと思います。
+利用データ
+Nishikaにて土地総合情報システムより収集・加工し作成したものです。
 
 **data(deepL)**   
-隠されたtest_audioディレクトリには、MP3形式の約150の録音が含まれています。これらの録音はノートパソコンのメモリには同時に収まりません。録音は北米の3つの離れた場所で行われました。サイト1と2は5秒単位でラベル付けされており、予測値と一致する必要がありますが、ラベル付けプロセスに時間がかかるため、サイト3のファイルはファイルレベルでのみラベル付けされています。そのため、サイト3はテストセットの行数が比較的少なく、より低い時間分解能の予測が必要です。 別のデータソースからの2つのサウンドスケープの例も、サウンドスケープがどのようにラベル付けされているかと、隠しデータセットのフォルダ構造を説明するために提供されています。2つの例の音声ファイルはBLKFR-10-CPL_20190611_093000.pt540.mp3とORANGE-7-CAP_20190606_093000.pt623.mp3です。これらのサウンドスケープは、カリフォルニア科学アカデミー鳥類哺乳類学科のJack Dumbacher氏のご厚意により提供されました。
+ファイル内容
+train.zip
+ └─*.csv	2021年第1四半期より前に取引された中古マンションの価格データ
+test.csv	2021年第1四半期、2021第2四半期に取引された中古マンションの価格データ
+sample_submission.csv	投稿データフォーマット
+
+カラム内容に関しては、データ説明ファイル(data_explanation.xlsx)をご参照ください
+データ説明ファイルを含む各データはコンペに参加することでダウンロードが可能になります
 
 ### train.csv colomn infomaiton
-notebook: nb001
-example: https://www.xeno-canto.org/134874
+notebook: eda01.ipynb
+example: https://panasonic-cns.udemy.com/course/python-data/learn/lecture/25769636?start=0#content
 
 |name|Explanation|
-|----|----|
-|rating|録音の質を表す(A,B,C,D,Eの5段階)|
-|playback_sed|...|
-|ebird_code|名前。nunique=264|
-|channels|チャンネル数。2種類('1 (mono)', '2 (stereo)')|
-|date|録音日。yyyy-mm-ddで記述されている。<-- すべてそうなってるかは確認していない。|
-|pitch|'Not specified', 'both', 'increasing', 'level', 'decreasing'の5種類。nb001でそれぞれの音を聞いてみた。(log20200730), 正直何を表しているかわからん。|
-|duration|audioファイルの再生時間。単位はseconds。|
-|filename|そのままの意味。filenameにかぶりはなし(nb001)。|
-|speed |Not specified, level, both, accelerating, decelerating の5種類。音を聞いたけど何が違うのか全然わからん。 |
-|species|264種類。今回のクラス数と一緒だな。ebird_codeと一対一？|
-|number_of_notes|サイト見たけど、何の数かわからん。['Not specified', '1-3', '4-6', '7-20', '>20']の5種類|
-|title|\<filename> \<鳥名> ?? の形式で書かれている。|
-|secondary_labels|メインの鳥の鳴き声以外のラベル。|
-|bird_seen|集音時に鳥を見たかどうか。|
-|sci_name|学名？|
-|location|集音場所|
-|latitude|緯度|
-|sampling_late|サンプリングレート|
-|type|song, call, fightなどある|
-|elevation|標高。'1400 m' みたいな感じで入ってるが、string型。'? m' もある。|
-|descriptin|audiofileにかかれているメタデータ。|
-|bitrate_o_mp3|stringで'128000 (bps)'のように格納されているが、8個だけNaNになっている(nb001)|
-|file_type|4種類。それぞれの個数はmp3=21367, wav=6, mp2=1, aac=1となっている。|
-|volume|'Not specified', 'both', 'increasing', 'level', 'decreasing'の5種類。またこの指標出た。意味がわからん。|
-|background|背景音。xeno-cantにも記述されている。secondaly_labelsとどう違うのだろうか。|
-|xc_id|filenameにある、XCと拡張子を除いた部分。例(XC134874.mp3 の134874がそれに当たる。重複なく各要素はユニーク。)|
-|url    |xeno-cant へのリンクURL|
-|country|集音した国|
-|author|集音者|
-|primary_label|ebird_code は primary_labelの略っぽい。例: Empidonax alnorum_Alder Flycatcher	--> aldfly|
-|longitude|経度|
-|length|'Not specified', '0-3(s)', '6-10(s)', '>10(s)', '3-6(s)' が要素にある。'Not specified' がダントツで多い。|
-|time|集音開始時刻。朝が多め。|
-|recordist|調べてみたら(nb001)、authorとrecordistは完全に一致してた。|
-|license|4種類あった。あまり有用な情報ではないだろう。|
+|----|----|Detail|
+|ID|取引ID|
+|種類|不動産の種類||
+|地域|周辺地域の状況※本データではnull||
+|市区町村コード|市区町村コード||
+|都道府県名|都道府県名||
+|市区町村名|市区町村名||
+|地区名|地区名||
+|最寄駅：名称|最寄りの鉄道駅の名称||
+|最寄駅：距離（分）|当該地から最寄りの鉄道駅（地下駅の場合には地表への出入口）までの時間距離（分）||
+|間取り|"専有部分の間取りを表示しています。なお、間取りが把握できないものは、空欄になっています。
+例）
+１Ｋ・１ＤＫ・２ＤＫ・１ＬＤＫ・２ＬＤＫ・３ＬＤＫ・４ＬＤＫ・その他"||
+|面積（㎡）|"登記簿に記載されている専有部分の床面積(㎡)（壁その他の区画の内側で測定（内定）された面積）を採用しています。
+いずれの場合も、10㎡未満の小規模な面積の物件については公表していません。
+なお、200㎡未満は「５㎡刻み」、200㎡以上は上位３桁目を四捨五入し上位２桁を表示、2,000㎡以上の大規模取引は「2,000㎡以上」（ただし、「農地」「林地」の場合は5,000㎡以上の大規模取引について「5,000㎡以上」）と表示しています。"||
+|土地の形状|土地のおおよその形状を「正方形」、「ほぼ正方形」、「長方形」、「ほぼ長方形」、「台形」、「ほぼ台形」、「不整形」、「ほぼ整形」、「袋地等」の別に表示　※本データではnull||
+|間口|土地の接道幅（m）（土地が道路に接している長さ）　※本データではnull||
+|延床面積（㎡）|延床面積(㎡)　※本データではnull||
+|建築年|"当該建物の建築年を表示しています。
+なお、1945年以前は「戦前」と表示されます。また、建築年が把握できないものは、空欄になっています。"||
+|建物の構造|"当該建物の構造を次の略号で表示しています。
+なお、構造が把握できないものは、空欄になっています。
+鉄骨鉄筋コンクリート造 : ＳＲＣ
+鉄筋コンクリート造 : ＲＣ
+鉄骨造 : 鉄骨造
+軽量鉄骨造 : 軽量鉄骨造
+ブロック造 : ブロック造
+木造 : 木造"||
+|用途|"利用の現況を表示しています。
+なお、複合用途の場合は列記しています。また、用途が把握できないものは、空欄になっています。
+例）
+住宅・事務所・店舗・工場・倉庫・作業場・駐車場・その他（ホテル・旅館、文教用施設、宗教用施設、病院等）"||
+|今後の利用目的|"今後予定されている利用目的を表示しています。
+なお、利用目的が把握できないものは、空欄になっています。
+例）
+住宅・店舗・事務所・工場・倉庫・その他（学校・文化施設、病院・福祉施設、駐車場等）"||
+|前面道路：方位|"土地が接面する前面道路の方位。
+なお、前面道路が把握できないものは、空欄になっています。"||
+|前面道路：種類|	"土地が接面する前面道路の種類。
+なお、前面道路が把握できないものは、空欄になっています。
+道路の種類については、以下に区分して表示しています。
+道路法上の道路は「国道」、「都道府県道」、「市町村道」等
+土地区画整理事業施行地区内の道路は、「区画街路」
+私人が管理する道で、いわゆる私道と称されているものは、「私道」
+その他の道は、「道路」"||
+|前面道路：幅員（ｍ）|"土地が接面する前面道路の幅員（ｍ）。
+なお、前面道路が把握できないものは、空欄になっています。"||
+|都市計画|"都市計画法上の用途地域などを次の略号で表示しています。
+なお、都市計画が把握できないものは、空欄になっています。
+第一種低層住居専用地域 : １低住専
+第二種低層住居専用地域 : ２低住専
+第一種中高層住居専用地域 : １中住専
+第二種中高層住居専用地域 : ２中住専
+第一種住居地域 : １種住居
+第二種住居地域 : ２種住居
+準住居地域 : 準住居
+田園住居地域 : 田園住居
+近隣商業地域 : 近隣商業
+商業地域 : 商業
+準工業地域 : 準工業
+工業地域 : 工業
+工業専用地域 : 工業専用
+市街化調整区域 : 調整区域
+市街化区域及び市街化調整区域外の都市計画区域 : 非線引き
+準都市計画区域 : 準都計
+都市計画区域外 : 都計外"||
+|建ぺい率（％）|指定建ぺい率（％）。把握できないものは、空欄になっています。||
+|容積率（％）|指定容積率（％）。把握できないものは、空欄になっています。||
+|取引時点|取引当事者への調査により得られた売買契約日を、また、売買契約日が不詳の場合には登記簿に記載されている登記原因日を四半期（３ヶ月）単位で表示||
+|改装|改装状況を表示しています。 改装したものは「改装済」、改装していないものは「未改装」を表示しています。 なお、改装状況が把握できないものは、空欄になっています。||
+|取引の事情等|取引にあたって価格に影響があると思われる追加情報を表示しています。アンケート調査の結果、追加情報が把握できた場合のみ表示しておりますのでご注意ください。||
+|取引価格（総額）_log|"取引の総額（円）の常用対数。
+取引の総額（円）は、仲介手数料等の諸費用は含みません。"||
 
 
 ## Log
-### 20200726
+### ~20220110
 - join!!
-- spectrogram-treeを使って確認してる。
-  - フィルタが入ってるデータとか多いな...
+- udemy講座通りにノートブックを作成し、提出。↓
+- nb01
+  - とりあえず作成してsubmitした。
+- nb02
+  - クロスバリデーションを実施。
+  - 都道府県の地価ランキングを特徴量に導入。
+  - 同じコンペ？(評価方法がrmse)のが[こちら](https://comp.probspace.com/topics/Oregin-Post8b7bae773e3db3bbba97)にあった。
 
-| not filter                                                                  | filter                                                                      |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| ![76f72d29.png](./data/info/images/readme/004.png) | ![792d2532.png](./data/info/images/readme/005.png) |
-| ![175a168c.png](./data/info/images/readme/006.png) | ![a4a433e5.png](./data/info/images/readme/007.png) |
-|                                                                             |                                                                             |
-
-- なんか音声ファイルにコメントがあったぞ。
-![4691ce6c.png](./data/info/images/readme/008.png)
-- うーん。とりあえず、提出方法を理解してみよう。
-
-### 20200727
-- テストデータはカーネルにしかないのか？
-- train.csv
-  - nb001
-  - train.csvのよくわからないカラムの意味は[ここ](https://www.xeno-canto.org/134874)見ればよさそう。
-
-  | train.csv   | train.csvに記載のurl先  |
-  | --- | --- |
-  | ![933fdc05.png](./data/info/images/readme/002.png)    | ![d29b222f.png](./data/info/images/readme/003.png)  |
-  - playback_used と bird_seen のnull数が一致してる。
-  - secondary_labelには、メイン(primary_label)以外の鳥の鳴き声などが入ってる...。どうすんのこれ。
-  - bird_seen がNoなのは、声は聞いたが見ていないということ。
-  - filetypeはわずかだが、mp3以外もあるようだ
-  
-### 20200729
-- discussionにlibroa.load()について投げた
-    - https://www.kaggle.com/c/birdsong-recognition/discussion/170749
-
-### 20200730
-- xeno-cantoのレーティングの目安
-    A: Loud and Clear
-    B: Clear, but bird a bit distant, or some interference with other sound sources
-    C: Moderately clear, or quite some interference
-    D: Faint recording, or much interference
-    E: Barely audible
-
-- nb001
-    - pitchの、increasing, decreasing, both, level の確認を行った
-    - ebird_codeと鳥名の関係がわかった。ebird_codeは鳥名の略。
-      ![ebird](./data/info/images/readme/009.png)
-
+### 20210110
+- git/githubの仕組みを作成。今回のコンペ用ディレクトリ毎git/githubで管理する仕組みに。
+- READMEの作成
 
 
