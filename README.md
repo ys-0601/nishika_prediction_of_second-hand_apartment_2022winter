@@ -130,8 +130,8 @@ sample_submission.csv	投稿データフォーマット
 notebook: eda01.ipynb
 example: https://panasonic-cns.udemy.com/course/python-data/learn/lecture/25769636?start=0#content
 
-|name|Explanation|
-|----|----|Detail|
+|name|Explanation|Detail|
+|----|----|----|----|
 |ID|取引ID|
 |種類|不動産の種類||
 |地域|周辺地域の状況※本データではnull||
