@@ -87,9 +87,17 @@ nishika_prediction_of_second-hand_apartment_2022winter
 |03|<font color='gray'>Done</font>|kaggleでよく使う交差検証テンプレ(LightGBM向け)
 |交差検証(複数種類)テンプレ|2021/11|[url](https://amateur-engineer-blog.com/kaggle-cv-template-lightgbm/)|
 |04|<font color='orange'>Todo</font>|LightGBM(gbdt)のパラメータ/Tuningの個人的まとめ|lightGBMのパラメータまとめ|2020/09|[url](https://zenn.dev/mosamosa/articles/07d0076c9292136a3639)|
-|05|<font color='orange'>Todo</font>|---|---|---|[url]()|
+|05|<font color='orange'>Done</font>|GBDTのハイパーパラメータの意味を図で理解しつつチューニングを学ぶ|XGBoostの概念説明＆パラメータ説明　XGBoostとはなんぞや？という時に|2021/06|[url](https://knknkn.hatenablog.com/entry/2021/06/29/125226#%E3%81%93%E3%81%AE%E8%A8%98%E4%BA%8B%E3%81%AF%E4%BD%95%E3%81%8B)|
 |06|<font color='gray'>Doint</font>|---|---|---|[url]()|
 |07|<font color='gray'>Done</font>|---|---|---|[url]()|
+|08|<font color='gray'>Done</font>|---|---|---|[url]()|
+|09|<font color='gray'>Done</font>|---|---|---|[url]()|
+|10|<font color='gray'>Done</font>|---|---|---|[url]()|
+|11|<font color='gray'>Done</font>|---|---|---|[url]()|
+|12|<font color='gray'>Done</font>|---|---|---|[url]()|
+|13|<font color='gray'>Done</font>|---|---|---|[url]()|
+|14|<font color='gray'>Done</font>|---|---|---|[url]()|
+|15|<font color='gray'>Done</font>|---|---|---|[url]()|
 
 ## Memo
 - term
@@ -222,4 +230,9 @@ example: https://panasonic-cns.udemy.com/course/python-data/learn/lecture/257696
 - git/githubの仕組みを作成。今回のコンペ用ディレクトリ毎git/githubで管理する仕組みに。
 - READMEの作成
 
-
+### 20210113
+- Optuna実装開始
+- 下記のエラー発生。[こちら]{https://github.com/microsoft/LightGBM/issues/4019}の下記の方の投稿が解決に役立った。
+  - error message："Cannot change max_bin after constructed Dataset handle."
+  - Post name："shiyu1994 commented on 24 Feb 2021"
+- Optunaの実行を仕掛けて終了
