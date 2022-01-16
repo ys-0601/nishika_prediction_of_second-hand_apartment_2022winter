@@ -226,13 +226,33 @@ example: https://panasonic-cns.udemy.com/course/python-data/learn/lecture/257696
   - 都道府県の地価ランキングを特徴量に導入。
   - 同じコンペ？(評価方法がrmse)のが[こちら](https://comp.probspace.com/topics/Oregin-Post8b7bae773e3db3bbba97)にあった。
 
-### 20210110
+### 20220110
 - git/githubの仕組みを作成。今回のコンペ用ディレクトリ毎git/githubで管理する仕組みに。
 - READMEの作成
 
-### 20210113
+### 20220113
 - Optuna実装開始
 - 下記のエラー発生。[こちら]{https://github.com/microsoft/LightGBM/issues/4019}の下記の方の投稿が解決に役立った。
   - error message："Cannot change max_bin after constructed Dataset handle."
   - Post name："shiyu1994 commented on 24 Feb 2021"
 - Optunaの実行を仕掛けて終了
+  - 結果が良くなかった。。。パラメータセッティングしない場合と大差無い印象。->セッティングが悪い？？
+- <font color='red'>nb03</font>
+  - Optunaのチューニング結果を利用したlightGBM
+  - パラメータセッティングしない場合と大差ない印象。
+  - result
+    - 0.0778
+
+### 20220114/20220116
+- <font color='red'>nb04</font>
+  - Optunaを長時間チューニング（7h）
+  - Optuna上では0.067775が出ていたので、明らかに偶然過学習していたものが出力されている。
+  - submitの結果は過去一
+  - result
+    - 0.0765
+
+- EDAを再開
+  - 取引時点がtrainとtestでズレがあった。
+    - train：2005.75 - 2020.99
+    - test:2021.25 - 2021.5
+

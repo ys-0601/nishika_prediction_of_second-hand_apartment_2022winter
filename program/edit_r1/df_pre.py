@@ -141,8 +141,8 @@ def data_pre(df):
                   "改装", "取引の事情等", "取引価格（総額）_log"]
     df = df.reindex(columns=index_array)
     
-    for col in ["地区名", "最寄駅：名称", "間取り", "用途", "今後の利用目的", "都市計画", "改装", "取引の事情等"]:
-                df[col] = df[col].astype("category")
+    #for col in ["地区名", "最寄駅：名称", "間取り", "用途", "今後の利用目的", "都市計画", "改装", "取引の事情等"]:
+    #            df[col] = df[col].astype("category")
     print("test")
     return df
 
